@@ -1,0 +1,86 @@
+body, html {
+  padding: 0;
+}
+
+.CarouselWrapper {
+  display: flex;
+  align-items: stretch;
+  margin: auto;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+}
+
+.CarouselContainer {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-basis: auto;
+  list-style-type: none;
+  white-space: nowrap;
+  transition: transform 1s ease-in-out;
+  max-width: 84vw;
+  margin: auto;
+}
+
+.CarouselItemWrapper {
+  justify-content: center;
+  width: 54vw;
+  overflow: hidden;
+  margin: auto;
+}
+
+.CarouselItem {
+  background: cornflowerblue;
+  display: inline-block;
+  width: 25vw;
+  height: 100px;
+  text-align: center;
+  margin: 1vw;
+  transition: transform 300ms ease;
+}
+
+.CarouselText {
+  width: 25vw;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.CarouselButtons {
+  height: 10vw;
+  width: 6vw;
+  margin: 1vw;
+  border: none;
+  outline: none;
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.NavBarWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.NavBar {
+  height: 2vw;
+  width: 2vw;
+  margin: 1vw;
+  background-color: dimgray;
+  border-radius: 50%;
+  font-size: small;
+  border: none;
+  outline: none;
+}
+
+.NavBar:hover, .CarouselButtons:hover {
+  cursor: pointer;
+}
+
+.NavBar:active, .CarouselButtons:active {
+  transform: translateY(1px);
+}
