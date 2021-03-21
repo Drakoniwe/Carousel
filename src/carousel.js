@@ -3,6 +3,7 @@ import propTypes from 'prop-types'
 import arrowRight from './assets/arrow_right.png'
 import arrowLeft from './assets/arrow_left.png'
 Carousel.propTypes = { slides: propTypes.array }
+
 function Carousel ({ slides }) {
   const [currentPos, setCurrentPos] = useState(0)
   const [addToMovement, setAddToMovement] = useState(0)

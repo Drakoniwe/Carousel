@@ -36,10 +36,12 @@ body, html {
   background: cornflowerblue;
   display: inline-block;
   width: 25vw;
-  height: 100px;
+  height: 10vw;
   text-align: center;
   margin: 1vw;
   transition: transform 300ms ease;
+  font-size: 25px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .CarouselText {
