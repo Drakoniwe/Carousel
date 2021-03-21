@@ -20,7 +20,6 @@ body, html {
   flex-basis: auto;
   list-style-type: none;
   white-space: nowrap;
-  transition: transform 1s ease-in-out;
   max-width: 84vw;
   margin: auto;
 }
@@ -39,7 +38,6 @@ body, html {
   height: 10vw;
   text-align: center;
   margin: 1vw;
-  transition: transform 300ms ease;
   font-size: 25px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
