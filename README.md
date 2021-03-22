@@ -26,3 +26,4 @@ export const slides = [
   }
 ]
 ```
+## Setting up the application
