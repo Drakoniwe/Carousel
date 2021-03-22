@@ -27,3 +27,21 @@ export const slides = [
 ]
 ```
 ## Setting up the application
+### 1. Setting up a working environment
+To setup an environment, you need to have installed LTS version of Node.js & npm.
+
+Open the folder with the project and install all the dependencies using this command:
+```
+npm install
+```
+### 2. Starting project in development mode
+The app is written in ReactJS and built using the bundler Webpack. To start development mode, run this command:
+```
+npm run start
+``` 
+### 3. Starting project in production mode
+To start the app for the end user, run this command:
+```
+npm run build
+```
+All files for hosting will be stored in dist folder.
