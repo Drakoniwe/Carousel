@@ -4,8 +4,9 @@ Simple carousel component that works on mobile and desktop!
 ## Currently supported features:
 1. 3 slides on screen.
 2. Navigation bar.
-3. Swipes for mobile devices.
-4. Adding more slides or deleting unneeded.
+3. Swipes for mobile and desktop devices.
+4. Snapping to nearest slide.
+5. Adding more slides or deleting unneeded.
 ## Adding more slides
 If needed, you can add more slides or even delete ones you do not need (3 is the minimum). Just edit index.js file adding any HTML content to the slide.
 Example before:
