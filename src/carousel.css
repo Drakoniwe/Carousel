@@ -9,19 +9,19 @@ body, html {
   padding: 0;
   margin: 0;
   justify-content: center;
+  user-select: none;
 }
 
 .CarouselContainer {
-  flex: 1;
   overflow: hidden;
   position: relative;
   display: flex;
+  flex-direction: row;
   flex-wrap: nowrap;
   flex-basis: auto;
   list-style-type: none;
   white-space: nowrap;
   max-width: 84vw;
-  margin: auto;
 }
 
 .CarouselItemWrapper {
@@ -31,12 +31,21 @@ body, html {
   margin: auto;
 }
 
+.CarouselItems {
+  display: flex;
+  flex-direction: row;
+}
+
 .CarouselItem {
+  overflow: hidden;
   background: cornflowerblue;
-  display: inline-block;
   width: 25vw;
+  min-width: 25vw;
+  max-width: 25vw;
   height: 10vw;
+  max-height: 10vw;
   text-align: center;
+  line-height: 10vw;
   margin: 1vw;
   font-size: 25px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -83,4 +92,9 @@ body, html {
 
 .NavBar:active, .CarouselButtons:active {
   transform: translateY(1px);
+}
+
+img {
+  width: 25vw;
+  height: 10vw;
 }

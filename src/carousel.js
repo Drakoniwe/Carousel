@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import propTypes from 'prop-types'
-import arrowRight from './assets/arrow_right.png'
 import arrowLeft from './assets/arrow_left.png'
 Carousel.propTypes = { slides: propTypes.array }
 
@@ -11,8 +10,16 @@ function Carousel ({ slides }) {
   const [elementMargin, setElementMargin] = useState(0)
   const slideTotalWidth = elementWidth + elementMargin
   const [swipeTouchPos, setSwipeTouchPos] = useState(0)
+  const [movementDiff, setMovementDiff] = useState(0)
+  const [mousePos, setMousePos] = useState(0)
+  const [mouseDiff, setMouseDiff] = useState(0)
+  const [isDown, setIsDown] = useState(false)
   const itemRef = useRef(null)
   const itemsToShow = slides.length - 3
+  const keyPoint = Math.ceil(movementDiff / slideTotalWidth)
+  const keyPointMouseScroll = Math.ceil(mouseDiff / slideTotalWidth) // definition of a new formula is needed because touch events..
+  const diffNextSlide = slideTotalWidth * keyPoint - movementDiff // ..use targetTouches[0].clientX instead of clientX
+  const diffNextSlideMouse = slideTotalWidth * keyPointMouseScroll - mouseDiff
 
   useEffect(() => {
     if (itemRef.current) {
@@ -26,12 +33,13 @@ function Carousel ({ slides }) {
         const getMarginInt = parseFloat(getMargin)
         setElementMargin(getMarginInt * 2)
       }
-      const item = new ResizeObserver(entries => {
+      // eslint-disable-next-line no-undef
+      const item = new ResizeObserver((entries) => {
         // make the buttons work when window is resized
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           getElementWidth()
           getMargin()
-          setCurrentPos(0) // if this is not done then slides will fly away when window is resized, I haven't found how to fix it yet
+          setCurrentPos(0) // start from beginning when window is resized so component works correctly
         })
       })
       item.observe(itemRef.current)
@@ -40,30 +48,37 @@ function Carousel ({ slides }) {
       }
     }
   }, [itemRef.current])
+
   /**
- * handle start of a swipe
- */
-  const handleStart = (e) => {
+   * handle mouse drag, using Pointer events caused swipes on mobile to be wacky so I stuck to separate logic
+   */
+  const onMouseDown = (e) => {
     if (addToMovement !== currentPos) {
       setAddToMovement(currentPos)
     }
-    setSwipeTouchPos(e.targetTouches[0].clientX) // get initial position of a finger
+    setIsDown(true)
+    setMousePos(e.clientX)
   }
-  /**
- * handle movement of a swipe
- */
-  const handleMove = (e) => {
-    const getMovementDiff = swipeTouchPos - e.targetTouches[0].clientX // get difference between the start of a touch and the final movement
 
-    setCurrentPos(getMovementDiff + addToMovement)
+  const onMouseMove = (e) => {
+    if (!isDown) return
+    e.preventDefault()
+    const getMouseDiff = mousePos - e.clientX
+    setCurrentPos(getMouseDiff + addToMovement)
+    setMouseDiff(getMouseDiff) // cache movement difference so snapping to nearest slide can be calculated
   }
-  /**
- * handle end of a swipe
- */
-  const handleEnd = () => {
+
+  const onMouseUp = () => {
+    setIsDown(false)
     if (currentPos < slideTotalWidth * itemsToShow) {
       // if user has not reached the most right move as normal
       setAddToMovement(currentPos)
+      // snap to nearest slide
+      if (diffNextSlideMouse < slideTotalWidth / 2) {
+        setCurrentPos(currentPos + diffNextSlideMouse)
+      } else {
+        setCurrentPos(currentPos - (slideTotalWidth - diffNextSlideMouse))
+      }
     } else {
       setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
       setAddToMovement(currentPos)
@@ -73,7 +88,71 @@ function Carousel ({ slides }) {
       setCurrentPos(0)
       setAddToMovement(0)
     }
+    setMouseDiff(0)
   }
+
+  const onPointerLeave = () => {
+    setIsDown(false)
+    setMouseDiff(0)
+    // add snapping if user moves the mouse out of the component
+    if (diffNextSlideMouse < slideTotalWidth / 2) {
+      setCurrentPos(currentPos + diffNextSlideMouse)
+    } else {
+      setCurrentPos(currentPos - (slideTotalWidth - diffNextSlideMouse))
+    }
+    if (currentPos < 0) {
+      setCurrentPos(0)
+      setAddToMovement(0)
+    } else if (currentPos > slideTotalWidth * itemsToShow) {
+      setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
+      setAddToMovement(currentPos)
+    }
+  }
+  /**
+   * handle start of a swipe
+   */
+  const handleStart = (e) => {
+    if (addToMovement !== currentPos) {
+      setAddToMovement(currentPos)
+    }
+    e.preventDefault()
+    setSwipeTouchPos(e.targetTouches[0].clientX) // get initial position of a finger
+  }
+  /**
+   * handle movement of a swipe
+   */
+  const handleMove = (e) => {
+    const getMovementDiff = swipeTouchPos - e.targetTouches[0].clientX // get difference between the start of a touch and the final movement
+    setCurrentPos(getMovementDiff + addToMovement)
+    setMovementDiff(getMovementDiff) // cache movement difference so snapping to nearest slide can be calculated
+  }
+  /**
+   * handle end of a swipe
+   */
+  const handleEnd = (e) => {
+    e.preventDefault()
+    if (currentPos < slideTotalWidth * itemsToShow) {
+      // if user has not reached the most right move as normal
+      setAddToMovement(currentPos)
+      // snap to nearest slide
+      if (diffNextSlide < slideTotalWidth / 2) {
+        setCurrentPos(currentPos + diffNextSlide)
+      } else {
+        setCurrentPos(currentPos - (slideTotalWidth - diffNextSlide))
+      }
+    } else {
+      setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
+      setAddToMovement(currentPos)
+    }
+    if (currentPos < 0) {
+      // disable going left
+      setCurrentPos(0)
+      setAddToMovement(0)
+    }
+
+    setMovementDiff(0)
+  }
+
   const moveToNextSlide = () => {
     if (currentPos > elementWidth * itemsToShow) {
       setCurrentPos(0)
@@ -92,7 +171,8 @@ function Carousel ({ slides }) {
   }
 
   const navigationBar = (value) => () => {
-    if (value >= itemsToShow) { // disable last 3 buttons
+    if (value >= itemsToShow) {
+      // disable last 3 buttons
       setCurrentPos(slideTotalWidth * itemsToShow)
       setAddToMovement(slideTotalWidth * value)
     } else {
@@ -100,17 +180,25 @@ function Carousel ({ slides }) {
       setAddToMovement(slideTotalWidth * value)
     }
   }
+
   return (
     <div>
       <div className="CarouselWrapper">
-        <button style={{ backgroundImage: `url(${arrowLeft})` }} onClick={moveToPrevSlide} className="CarouselButtons">
-        </button>
-        <div className="CarouselContainer">
+        <button
+          style={{ backgroundImage: `url(${arrowLeft})` }}
+          onClick={moveToPrevSlide}
+          className="CarouselButtons"
+        />
+        <div className="CarouselContainer" onMouseLeave={onPointerLeave}>
           <div
             className="CarouselItemWrapper"
             onTouchStart={handleStart}
             onTouchMove={handleMove}
             onTouchEnd={handleEnd}
+            //
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
             style={{
               // here we set how much slides will be seen, it is hardcoded, 3 is the amount of slides to show
               width: `${slideTotalWidth * 3}px`
@@ -130,14 +218,20 @@ function Carousel ({ slides }) {
                   className="CarouselItem"
                   id="item"
                 >
-                  <div className="CarouselText">{slide.title}</div>
+                  {slide}
                 </div>
               ))}
             </div>
           </div>
         </div>
-        <button style={{ backgroundImage: `url(${arrowRight})` }} onClick={moveToNextSlide} className="CarouselButtons">
-        </button>
+        <button
+          style={{
+            transform: 'scaleX(-1)',
+            backgroundImage: `url(${arrowLeft})`
+          }}
+          onClick={moveToNextSlide}
+          className="CarouselButtons"
+        />
       </div>
       <div className="NavBarWrapper">
         {slides.map((slide, index) => (
