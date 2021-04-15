@@ -1,25 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
 import propTypes from 'prop-types'
 import arrowLeft from './assets/arrow_left.png'
-Carousel.propTypes = { slides: propTypes.array }
-
-function Carousel ({ slides }) {
+function Carousel ({ children }) {
   const [currentPos, setCurrentPos] = useState(0)
   const [addToMovement, setAddToMovement] = useState(0)
   const [elementWidth, setElementWidth] = useState(0)
   const [elementMargin, setElementMargin] = useState(0)
   const slideTotalWidth = elementWidth + elementMargin
-  const [swipeTouchPos, setSwipeTouchPos] = useState(0)
-  const [movementDiff, setMovementDiff] = useState(0)
   const [mousePos, setMousePos] = useState(0)
   const [mouseDiff, setMouseDiff] = useState(0)
   const [isDown, setIsDown] = useState(false)
   const itemRef = useRef(null)
-  const itemsToShow = slides.length - 3
-  const keyPoint = Math.ceil(movementDiff / slideTotalWidth)
-  const keyPointMouseScroll = Math.ceil(mouseDiff / slideTotalWidth) // definition of a new formula is needed because touch events..
-  const diffNextSlide = slideTotalWidth * keyPoint - movementDiff // ..use targetTouches[0].clientX instead of clientX
-  const diffNextSlideMouse = slideTotalWidth * keyPointMouseScroll - mouseDiff
+  const itemsToShow = children.length - 3
+  const keyPoint = Math.ceil(mouseDiff / slideTotalWidth)
+  const diffNextSlide = slideTotalWidth * keyPoint - mouseDiff
 
   useEffect(() => {
     if (itemRef.current) {
@@ -50,9 +44,9 @@ function Carousel ({ slides }) {
   }, [itemRef.current])
 
   /**
-   * handle mouse drag, using Pointer events caused swipes on mobile to be wacky so I stuck to separate logic
+   * handle start of a swipe
    */
-  const onMouseDown = (e) => {
+  const onPointerDown = (e) => {
     if (addToMovement !== currentPos) {
       setAddToMovement(currentPos)
     }
@@ -60,77 +54,22 @@ function Carousel ({ slides }) {
     setMousePos(e.clientX)
   }
 
-  const onMouseMove = (e) => {
-    if (!isDown) return
-    e.preventDefault()
-    const getMouseDiff = mousePos - e.clientX
-    setCurrentPos(getMouseDiff + addToMovement)
-    setMouseDiff(getMouseDiff) // cache movement difference so snapping to nearest slide can be calculated
-  }
-
-  const onMouseUp = () => {
-    setIsDown(false)
-    if (currentPos < slideTotalWidth * itemsToShow) {
-      // if user has not reached the most right move as normal
-      setAddToMovement(currentPos)
-      // snap to nearest slide
-      if (diffNextSlideMouse < slideTotalWidth / 2) {
-        setCurrentPos(currentPos + diffNextSlideMouse)
-      } else {
-        setCurrentPos(currentPos - (slideTotalWidth - diffNextSlideMouse))
-      }
-    } else {
-      setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
-      setAddToMovement(currentPos)
-    }
-    if (currentPos < 0) {
-      // disable going left
-      setCurrentPos(0)
-      setAddToMovement(0)
-    }
-    setMouseDiff(0)
-  }
-
-  const onPointerLeave = () => {
-    setIsDown(false)
-    setMouseDiff(0)
-    // add snapping if user moves the mouse out of the component
-    if (diffNextSlideMouse < slideTotalWidth / 2) {
-      setCurrentPos(currentPos + diffNextSlideMouse)
-    } else {
-      setCurrentPos(currentPos - (slideTotalWidth - diffNextSlideMouse))
-    }
-    if (currentPos < 0) {
-      setCurrentPos(0)
-      setAddToMovement(0)
-    } else if (currentPos > slideTotalWidth * itemsToShow) {
-      setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
-      setAddToMovement(currentPos)
-    }
-  }
-  /**
-   * handle start of a swipe
-   */
-  const handleStart = (e) => {
-    if (addToMovement !== currentPos) {
-      setAddToMovement(currentPos)
-    }
-    e.preventDefault()
-    setSwipeTouchPos(e.targetTouches[0].clientX) // get initial position of a finger
-  }
   /**
    * handle movement of a swipe
    */
-  const handleMove = (e) => {
-    const getMovementDiff = swipeTouchPos - e.targetTouches[0].clientX // get difference between the start of a touch and the final movement
+  const onPointerMove = (e) => {
+    if (!isDown) return
+    e.preventDefault()
+    const getMovementDiff = mousePos - e.clientX
     setCurrentPos(getMovementDiff + addToMovement)
-    setMovementDiff(getMovementDiff) // cache movement difference so snapping to nearest slide can be calculated
+    setMouseDiff(getMovementDiff) // cache movement difference so snapping to nearest slide can be calculated
   }
+
   /**
    * handle end of a swipe
    */
-  const handleEnd = (e) => {
-    e.preventDefault()
+  const onPointerUp = () => {
+    setIsDown(false)
     if (currentPos < slideTotalWidth * itemsToShow) {
       // if user has not reached the most right move as normal
       setAddToMovement(currentPos)
@@ -149,8 +88,25 @@ function Carousel ({ slides }) {
       setCurrentPos(0)
       setAddToMovement(0)
     }
+    setMouseDiff(0)
+  }
 
-    setMovementDiff(0)
+  const onPointerLeave = () => {
+    setIsDown(false)
+    setMouseDiff(0)
+    // add snapping if user moves the mouse out of the component
+    if (diffNextSlide < slideTotalWidth / 2) {
+      setCurrentPos(currentPos + diffNextSlide)
+    } else {
+      setCurrentPos(currentPos - (slideTotalWidth - diffNextSlide))
+    }
+    if (currentPos < 0) {
+      setCurrentPos(0)
+      setAddToMovement(0)
+    } else if (currentPos > slideTotalWidth * itemsToShow) {
+      setCurrentPos(slideTotalWidth * itemsToShow) // stop at final slide
+      setAddToMovement(currentPos)
+    }
   }
 
   const moveToNextSlide = () => {
@@ -180,7 +136,6 @@ function Carousel ({ slides }) {
       setAddToMovement(slideTotalWidth * value)
     }
   }
-
   return (
     <div>
       <div className="CarouselWrapper">
@@ -189,16 +144,13 @@ function Carousel ({ slides }) {
           onClick={moveToPrevSlide}
           className="CarouselButtons"
         />
-        <div className="CarouselContainer" onMouseLeave={onPointerLeave}>
+        <div className="CarouselContainer" onPointerLeave={onPointerLeave}>
           <div
             className="CarouselItemWrapper"
-            onTouchStart={handleStart}
-            onTouchMove={handleMove}
-            onTouchEnd={handleEnd}
-            //
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            // Pointer events support both mouse and touches
             style={{
               // here we set how much slides will be seen, it is hardcoded, 3 is the amount of slides to show
               width: `${slideTotalWidth * 3}px`
@@ -211,7 +163,7 @@ function Carousel ({ slides }) {
                 transition: 'all 0.5s ease'
               }}
             >
-              {slides.map((slide, index) => (
+              {children.map((slide, index) => (
                 <div
                   key={index}
                   ref={index === 0 ? itemRef : null}
@@ -234,7 +186,7 @@ function Carousel ({ slides }) {
         />
       </div>
       <div className="NavBarWrapper">
-        {slides.map((slide, index) => (
+        {children.map((slide, index) => (
           <button key={index} onClick={navigationBar(index)} className="NavBar">
             {slide.index}
           </button>
@@ -243,5 +195,5 @@ function Carousel ({ slides }) {
     </div>
   )
 }
-
+Carousel.propTypes = { children: propTypes.array }
 export default Carousel

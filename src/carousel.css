@@ -22,6 +22,7 @@ body, html {
   list-style-type: none;
   white-space: nowrap;
   max-width: 84vw;
+  /* margin: auto; */
 }
 
 .CarouselItemWrapper {
@@ -29,6 +30,7 @@ body, html {
   width: 54vw;
   overflow: hidden;
   margin: auto;
+  touch-action: none;
 }
 
 .CarouselItems {
