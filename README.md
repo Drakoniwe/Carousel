@@ -11,26 +11,26 @@ Simple carousel component that works on mobile and desktop!
 If needed, you can add more slides or even delete ones you do not need (3 is the minimum). Just edit index.js file adding any HTML content to the slide.
 Example before:
 ```
-const slides = [
-  <div key="5">Slide 5 </div>,
-  <div key="6">Slide 6 </div>,
-  <div key="7">Slide 7 </div>
-  ]
+<Carousel>
+    <div>Slide 5</div>
+    <div>Slide 6</div>
+    <div>Slide 7</div>
+  </Carousel>,
 ```
 And after:
 ```
-const slides = [
-  <div key="5">Slide 5 </div>,  // do not forget to add a unique key to each slide!
-  <div key="6">Slide 6 </div>,
-  <div key="7">Slide 7 </div>,
-  <div key="8">Custom Text</div>,
-  <div key="9">
-    <button>Custom Text in a button</button>
-  </div>,
-  <div key="10">
-    <img src="https://via.placeholder.com/300/000000/FFFFFF?text=Custom image Slide" />
-  </div>
-  ]
+<Carousel>
+    <div>Slide 5</div>
+    <div>Slide 6</div>
+    <div>Slide 7</div>
+    <div>Custom Text</div>
+    <div>
+      <button>Custom Text in a button</button>
+    </div>
+    <div>
+      <img src="https://via.placeholder.com/300/000000/FFFFFF?text=Custom image Slide" />
+    </div>
+  </Carousel>,
 ```
 ## Setting up the application
 ### 1. Setting up a working environment
